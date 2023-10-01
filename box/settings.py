@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     
     # ThirdParty
     'corsheaders',
+    'bootstrap_datepicker_plus',
 ]
 
 MIDDLEWARE = [

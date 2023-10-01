@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Events</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js" integrity="sha256-alsi6DkexWIdeVDEct5s7cnqsWgOqsh2ihuIZbU6H3I=" crossorigin="anonymous"></script>
+
+    </head>
+    <body>
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        Add event
+        </button>
+
+        <div id='calendar'></div>
+
+
+        <!-- Modal for Rejection Reason -->
+        <div class="modal fade bd-example-modal-xl" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h6 class="modal-title m-0" id="myLargeModalLabel">Add event</span></h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <!--end modal-header-->
+                    <div class="modal-body text-center">
+                        {{ form.media }} 
+                        <form method="POST" action="{% url 'blog:view_schedule' %}">
+                            {% csrf_token %}
+                            {{ form.as_p }}
+                            <div class="form-group">
+                                <button type="submit" name="save_continue" class="btn btn-success btn-sm text-light px-4 mt-3 mx-4 mb-0">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                    <!--end modal-body-->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                    </div>
+                    <!--end modal-footer-->
+                </div>
+                <!--end modal-content-->
+            </div>
+            <!--end modal-dialog-->
+        </div>
+        <!--end modal-->        
+
+        <script>
+
+        function addEventToCalendar(){
+            console.log("REACHED")
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+            // initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },            
+            // selectable: true,  
+            droppable: true, 
+            editable: true,
+            dayMaxEvents: true, // when too many events in a day, show the popover 
+            
+
+            eventDrop: function(info) {
+                alert(info.event.title + " was dropped on " + info.event.start.toISOString());
+
+
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'blog:drag_event' %}",
+                    data: {
+                        title: info.event.title,
+                        start: info.event.start.toISOString(),
+                        csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val(),
+                    },
+                    success: function (response) {
+                        // $("#result").html(response.message);
+                        alert("Successfully changed date")
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(xhr.responseText);
+                    },
+                });
+
+                // if (!confirm("Are you sure about this change?")) {
+                // info.revert();
+                // }
+            },            
+             eventSources: [
+                // your event source
+                {
+                url: "{% url 'blog:get_events' %}", // use the `url` property
+                // color: 'yellow',    // an option!
+                // textColor: 'black'  // an option!
+                }
+
+                // any other sources...
+
+            ],
+            dateClick: function(info) {
+                alert('clicked ' + info.dateStr);
+                addEventToCalendar()
+            },
+            // select: function(info) {
+            //     alert('selected ' + info.startStr + ' to ' + info.endStr);
+            // }            
+            });
+            calendar.render();
+        });
+
+        </script>        
+    </body>
+</html>
