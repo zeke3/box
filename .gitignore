@@ -1,0 +1,8 @@
+media/**
+blog/migrations/**
+ohif/migrations/**
+*.pyc
+.env
+celerybeat-schedule
+celerybeat-schedule.db
+db.sqlite3
